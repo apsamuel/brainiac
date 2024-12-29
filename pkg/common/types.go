@@ -5,12 +5,12 @@ import (
 )
 
 type Storer[T any] interface {
-	Get(key string) (T, error)
-	Set(key string, value T) error
+	// Get(key string) (T, error)
+	// Set(key string, value T) error
 	Retrieve(query string) ([]T, error)
-	RetrieveById(id string) (T, error)
+	RetrieveById(id string) ([]T, error)
 	VectorSearch(queryVector []float64) ([]T, error)
-	Execute(ctx context.Context, query string, args ...interface{}) ([]interface{}, error)
+	ExecuteQuery(ctx context.Context, query string, args ...interface{}) ([]interface{}, error)
 }
 
 type Schema interface {
