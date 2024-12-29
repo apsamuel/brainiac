@@ -1,0 +1,174 @@
+package database
+
+import (
+	"context"
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"reflect"
+	"strconv"
+	"strings"
+
+	"github.com/apsamuel/brainiac/pkg/common"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+var PostgresClient *gorm.DB
+
+type PostgresStore[T any] struct {
+	datasetName string
+	tableName   string
+}
+
+func (s *PostgresStore[T]) Retrieve(query string) ([]T, error) {
+	return nil, nil
+}
+
+func (s *PostgresStore[T]) RetrieveById(id string) ([]T, error) {
+	return nil, nil
+}
+
+func (s *PostgresStore[T]) VectorSearch(queryVector []float64) ([]T, error) {
+	return nil, nil
+}
+
+func (s *PostgresStore[T]) ExecuteQuery(ctx context.Context, query string, args ...interface{}) ([]interface{}, error) {
+	return nil, nil
+}
+
+type Float64Slice []float64
+
+// Value marshals Float64Slice to JSON for storage in the database
+func (f Float64Slice) Value() (driver.Value, error) {
+	return json.Marshal(f)
+}
+
+// Scan unmarshals JSON data to Float64Slice
+func (f *Float64Slice) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, &f)
+}
+
+// wrapFloat64SliceFields wraps []float64 fields with Float64Slice in the given struct
+func wrapFloat64SliceFields(data interface{}) interface{} {
+	v := reflect.ValueOf(data)
+	t := v.Type()
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		v = v.Elem()
+	}
+	wrappedStruct := reflect.New(t).Elem()
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.Type == reflect.TypeOf([]float64{}) {
+			wrappedStruct.Field(i).Set(reflect.ValueOf(Float64Slice(v.Field(i).Interface().([]float64))))
+		} else {
+			wrappedStruct.Field(i).Set(v.Field(i))
+		}
+	}
+	return wrappedStruct.Addr().Interface()
+}
+
+func checkPostgresTableExists(data interface{}) bool {
+	return PostgresClient.Migrator().HasTable(data)
+}
+
+func getSchema(data interface{}) map[string]string {
+	m := make(map[string]string)
+	v := reflect.ValueOf(data)
+	t := v.Type()
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		// v = v.Elem()
+	}
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.Type.String() == "database.Float64Slice" {
+			m[field.Name] = "blob"
+		}
+		if field.Type.String() == "db.PromptSchemaModelOptions" {
+			m[field.Name] = "text"
+		}
+		if field.Type.String() == "time.Time" {
+			m[field.Name] = "date"
+		}
+		if field.Type.String() == "float64" {
+			m[field.Name] = "real"
+		}
+		if field.Type.String() == "string" {
+			m[field.Name] = "text"
+		}
+		if field.Type.String() == "int" {
+			m[field.Name] = "integer"
+		}
+		if field.Type.String() == "bool" {
+			m[field.Name] = "integer"
+		}
+		// m[t.Field(i).Name] = t.Field(i).Tag.Get("gorm")
+	}
+	return m
+}
+
+func createPostgresTable(data interface{}) error {
+	tableName := data.(common.Schema).TableName()
+	fmt.Printf("tableName: %s\n", tableName)
+	wrappedData := wrapFloat64SliceFields(data)
+	fmt.Printf("%+v\n", wrappedData)
+	if !checkPostgresTableExists(wrappedData) {
+		fmt.Println(
+			"Table does not exist, creating table",
+		)
+		schema := getSchema(data)
+		var columns []string
+		for k, v := range schema {
+			fmt.Printf("%s %s\n", k, v)
+			columns = append(columns, fmt.Sprintf("\"%s\" %s", k, v))
+		}
+
+		statement := fmt.Sprintf("CREATE TABLE %s (%s)", tableName, strings.Join(columns, ","))
+		result := PostgresClient.Exec(statement)
+		if result.Error != nil {
+			return result.Error
+		}
+		fmt.Println("statement: ", result.Statement)
+	} else {
+		fmt.Println("Table already exists")
+	}
+	return nil
+}
+
+func buildPostgresDSN(config PostgresConfig) string {
+	dsn := "host=" + config.Host +
+		" port=" + strconv.Itoa(config.Port) +
+		" user=" + config.Username +
+		" password=" + config.Password +
+		" dbname=" + config.DatasetName +
+		" sslmode=disable"
+	fmt.Println(dsn)
+	return dsn
+}
+
+func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
+	// dsn := "host=" + config.Host + " port=" + strconv.Itoa(config.Port) + " user=postgres password=postgres dbname=postgres sslmode=disable"
+	db, err := gorm.Open(postgres.Open(buildPostgresDSN(config)), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func newPostgresStorage[T any](config Config, tableName string) common.Storer[T] {
+	var schema T
+	if err := createPostgresTable(schema); err != nil {
+		fmt.Println(err)
+	}
+	s := new(PostgresStore[T])
+	s.datasetName = config.Options.Dataset
+	s.tableName = tableName
+	return s
+}

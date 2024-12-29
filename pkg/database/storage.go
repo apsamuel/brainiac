@@ -5,7 +5,24 @@ import (
 )
 
 type Storage struct {
-	Name          string
-	Type          string
-	TrainingStore common.Storer[TrainingDataSchema]
+	Name         string
+	Type         string
+	TrainingData common.Storer[TrainingDataSchema]
+}
+
+func newStorage[T any](c Config, tableName string) common.Storer[T] {
+	switch c.Options.Engine {
+	case "postgres":
+		return newPostgresStorage[T](c, tableName)
+	default:
+		return nil
+	}
+}
+
+func MakeStorage(c Config) (*Storage, error) {
+	var storage Storage
+	storage.Name = c.Options.Dataset
+	storage.Type = c.Options.Engine
+	storage.TrainingData = newStorage[TrainingDataSchema](c, "training_data")
+	return &storage, nil
 }
