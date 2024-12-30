@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/apsamuel/brainiac/pkg/cache"
 	"github.com/apsamuel/brainiac/pkg/database"
 )
 
@@ -22,17 +23,27 @@ func init() {
 func main() {
 
 	var databaseConfig database.Config
+	var cacheConfig cache.Config
 	if Debug {
 		fmt.Println("debug mode enabled")
 	}
+
 	err := databaseConfig.Configure(ConfigFile)
 	if err != nil {
 		fmt.Println(err)
 	}
-	storage, err := database.MakeStorage(databaseConfig)
+
+	_, err = database.MakeStorage(databaseConfig)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(storage)
 
+	err = cacheConfig.Configure(ConfigFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	_, err = cache.MakeStorage(cacheConfig)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
