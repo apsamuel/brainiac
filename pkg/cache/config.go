@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"gopkg.in/yaml.v2"
-	// "os"
 )
 
 type Config struct {

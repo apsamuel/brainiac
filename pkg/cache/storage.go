@@ -1,11 +1,16 @@
 package cache
 
-func MakeStorage(c Config) RedisStorage {
+import "errors"
+
+func MakeStorage(c Config) (RedisStorage, error) {
 	switch c.Options.Engine {
 	case "redis":
-		storage := newRedisStorage(c.Options.Redis)
-		return *storage
+		storage, err := newRedisStorage(c.Options.Redis)
+		if err != nil {
+			return RedisStorage{}, err
+		}
+		return *storage, nil
 	default:
-		return RedisStorage{}
+		return RedisStorage{}, errors.New("unsupported cache engine")
 	}
 }
