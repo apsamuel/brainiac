@@ -27,25 +27,32 @@ func (t TrainingDataSchema) TableName() string {
 	return "training_data"
 }
 
+func (t TrainingDataSchema) Schema() map[string]string {
+	var m = make(map[string]string)
+	v := reflect.ValueOf(t)
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Type().Field(i)
+		if field.Type.String() == "[]float64" {
+			m[field.Name] = "blob"
+		}
+		if field.Type.String() == "string" {
+			m[field.Name] = "text"
+		}
+		if field.Type.String() == "int" {
+			m[field.Name] = "integer"
+		}
+		if field.Type.String() == "bool" {
+			m[field.Name] = "integer"
+		}
+		if field.Type.String() == "time.Time" {
+			m[field.Name] = "date"
+		}
+	}
+	return m
+}
+
 func (t TrainingDataSchema) Columns() []string {
 	var c []string
-	// return []string{
-	// 	"ID",
-	// 	"EmbeddingId",
-	// 	"Embedding",
-	// 	"EmbeddingModel",
-	// 	"Source",
-	// 	"SourceURL",
-	// 	"ChunksTotal",
-	// 	"ChunksIndexed",
-	// 	"Content",
-	// 	"CreatedAt",
-	// 	"IndexedAt",
-	// 	"IsActive",
-	// 	"Category",
-	// 	"Metadata",
-	// }
-	// use reflection to get the columns
 	v := reflect.ValueOf(t)
 	for i := 0; i < v.NumField(); i++ {
 		c = append(c, v.Type().Field(i).Name)
