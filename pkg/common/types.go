@@ -19,3 +19,10 @@ type Schema interface {
 	TableName() string
 	Columns() []string
 }
+
+type Item struct {
+	Source      string
+	Destination string
+	Attributes  []byte
+	Value       Schema
+}
