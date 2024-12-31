@@ -3,11 +3,13 @@ package cache
 import (
 	"os"
 
+	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
 	Options Options `yaml:"cache"`
+	Log     *zerolog.Logger
 }
 
 type Options struct {
