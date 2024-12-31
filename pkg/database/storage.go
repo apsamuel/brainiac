@@ -5,8 +5,9 @@ import (
 )
 
 type Storage struct {
-	Name         string
-	Type         string
+	Name string
+	Type string
+	// Log          *zerolog.Logger
 	TrainingData common.Storer[TrainingDataSchema]
 }
 
@@ -20,9 +21,13 @@ func newStorage[T any](c Config, tableName string) common.Storer[T] {
 }
 
 func MakeStorage(c Config) (*Storage, error) {
+	// l := logger.Logger
 	var storage Storage
 	storage.Name = c.Options.Dataset
 	storage.Type = c.Options.Engine
+	// storage.Log = &l.Logger
+	// storage.Log = &c.Log
+	// training_data
 	storage.TrainingData = newStorage[TrainingDataSchema](c, "training_data")
 	return &storage, nil
 }

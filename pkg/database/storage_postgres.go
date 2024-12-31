@@ -114,19 +114,15 @@ func getSchema(data interface{}) map[string]string {
 	return m
 }
 
-func createPostgresTable(data interface{}) error {
+func createPostgresTable(c Config, data interface{}) error {
 	tableName := data.(common.Schema).TableName()
-	fmt.Printf("tableName: %s\n", tableName)
 	wrappedData := wrapFloat64SliceFields(data)
-	fmt.Printf("%+v\n", wrappedData)
 	if !checkPostgresTableExists(wrappedData) {
-		fmt.Println(
-			"Table does not exist, creating table",
-		)
+		c.Log.Info().Msg("Table does not exist, creating table")
 		schema := getSchema(data)
 		var columns []string
 		for k, v := range schema {
-			fmt.Printf("%s %s\n", k, v)
+			c.Log.Info().Msg(fmt.Sprintf("%s %s", k, v))
 			columns = append(columns, fmt.Sprintf("\"%s\" %s", k, v))
 		}
 
@@ -135,9 +131,9 @@ func createPostgresTable(data interface{}) error {
 		if result.Error != nil {
 			return result.Error
 		}
-		fmt.Println("statement: ", result.Statement)
+		c.Log.Info().Msg("Table created")
 	} else {
-		fmt.Println("Table already exists")
+		c.Log.Info().Msg("Table already exists")
 	}
 	return nil
 }
@@ -149,12 +145,10 @@ func buildPostgresDSN(config PostgresConfig) string {
 		" password=" + config.Password +
 		" dbname=" + config.DatasetName +
 		" sslmode=disable"
-	fmt.Println(dsn)
 	return dsn
 }
 
 func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
-	// dsn := "host=" + config.Host + " port=" + strconv.Itoa(config.Port) + " user=postgres password=postgres dbname=postgres sslmode=disable"
 	db, err := gorm.Open(postgres.Open(buildPostgresDSN(config)), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -164,8 +158,8 @@ func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
 
 func newPostgresStorage[T any](config Config, tableName string) common.Storer[T] {
 	var schema T
-	if err := createPostgresTable(schema); err != nil {
-		fmt.Println(err)
+	if err := createPostgresTable(config, schema); err != nil {
+		config.Log.Error().Msgf("error creating table %s", tableName)
 	}
 	s := new(PostgresStore[T])
 	s.datasetName = config.Options.Dataset

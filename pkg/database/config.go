@@ -3,6 +3,7 @@ package database
 import (
 	"os"
 
+	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -28,6 +29,7 @@ type Options struct {
 
 type Config struct {
 	Options Options `yaml:"database"`
+	Log     *zerolog.Logger
 }
 
 func (c *Config) Configure(filename string) error {
