@@ -10,7 +10,7 @@ import (
 	"github.com/apsamuel/brainiac/pkg/http"
 )
 
-type Handler struct {
+type Agent struct {
 	Config    *Config
 	Channel   chan common.Item
 	Observers map[string]chan common.Item
@@ -98,14 +98,14 @@ type GenerateRequest struct {
 	Options map[string]interface{} `json:"options,omitempty"`
 }
 
-func (h *Handler) Consume(channel chan common.Item) error {
+func (h *Agent) Consume(channel chan common.Item) error {
 	for item := range channel {
 		fmt.Printf("Received event: %v", item)
 	}
 	return nil
 }
 
-func (h *Handler) Generate(r GenerateRequest) (*GenerateResponseWrapper, error) {
+func (h *Agent) Generate(r GenerateRequest) (*GenerateResponseWrapper, error) {
 	headers := makeHeaders("")
 	var response GenerateResponse
 	body, err := makeGenerateBody(r.Prompt, r.Model, r.System, r.Context)
@@ -135,7 +135,7 @@ func (h *Handler) Generate(r GenerateRequest) (*GenerateResponseWrapper, error) 
 
 }
 
-func (h *Handler) Embed(
+func (h *Agent) Embed(
 	r EmbedRequest,
 ) (*EmbedReponseWrapper, error) {
 	headers := makeHeaders("")

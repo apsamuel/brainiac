@@ -86,7 +86,7 @@ func main() {
 
 	apiConfig.Log = &l.Logger
 
-	apiHandler := api.Handler{
+	apiHandler := api.Agent{
 		Config:    &apiConfig,
 		Observers: observerChannels,
 		Storage:   storage,

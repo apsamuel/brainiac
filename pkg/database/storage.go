@@ -25,9 +25,6 @@ func MakeStorage(c Config) (*Storage, error) {
 	var storage Storage
 	storage.Name = c.Options.Dataset
 	storage.Type = c.Options.Engine
-	// storage.Log = &l.Logger
-	// storage.Log = &c.Log
-	// training_data
 	storage.TrainingData = newStorage[TrainingDataSchema](c, "training_data")
 	return &storage, nil
 }

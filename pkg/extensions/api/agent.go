@@ -17,7 +17,7 @@ type MethodHandleFuncs struct {
 	Public     string
 	HandleFunc http.HandlerFunc
 }
-type Handler struct {
+type Agent struct {
 	Config                   *Config
 	Router                   *mux.Router
 	EndpointMethodHandlerMap map[string]*common.Route
@@ -27,14 +27,14 @@ type Handler struct {
 	Templater                *template.Template
 }
 
-func (h *Handler) ConsumeEvents(eventChannel chan common.Item) error {
+func (h *Agent) ConsumeEvents(eventChannel chan common.Item) error {
 	for item := range eventChannel {
 		h.Config.Log.Info().Msgf("Received event: %v", item)
 	}
 	return nil
 }
 
-func (h *Handler) ToEventChannel(item common.Item) {
+func (h *Agent) ToEventChannel(item common.Item) {
 	c, ok := h.Observers[item.Destination]
 	if !ok {
 		h.Config.Log.Error().Msg("Observer not found")
@@ -44,7 +44,7 @@ func (h *Handler) ToEventChannel(item common.Item) {
 	c <- item
 }
 
-func (h *Handler) MakeRouter() error {
+func (h *Agent) MakeRouter() error {
 	h.Router = mux.NewRouter()
 	functionMap := template.FuncMap{
 		"foo": func() string {
@@ -57,7 +57,7 @@ func (h *Handler) MakeRouter() error {
 	return nil
 }
 
-func (h *Handler) AddRoute(route *common.Route) error {
+func (h *Agent) AddRoute(route *common.Route) error {
 
 	if route == nil {
 		return fmt.Errorf("route is nil")
@@ -68,7 +68,7 @@ func (h *Handler) AddRoute(route *common.Route) error {
 	return nil
 }
 
-func (h *Handler) ListRoutes() []*common.Route {
+func (h *Agent) ListRoutes() []*common.Route {
 	routes := []*common.Route{
 		{
 			Endpoint: "/health",
@@ -80,7 +80,7 @@ func (h *Handler) ListRoutes() []*common.Route {
 	return routes
 }
 
-func (h *Handler) Serve() error {
+func (h *Agent) Serve() error {
 	corsOptions := cors.Options{
 		AllowedOrigins:       h.Config.Options.Origins,
 		AllowOriginFunc:      nil,

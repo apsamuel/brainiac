@@ -22,7 +22,7 @@ type HealthPage struct {
 	// Template   string         `json:"template" yaml:"template"`
 }
 
-func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
+func (h *Agent) Health(w http.ResponseWriter, r *http.Request) {
 	var data Response
 	data.Data = "OK"
 	b, _ := json.Marshal(data)
