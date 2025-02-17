@@ -118,7 +118,7 @@ func createPostgresTable(c Config, data interface{}) error {
 	tableName := data.(common.Schema).TableName()
 	wrappedData := wrapFloat64SliceFields(data)
 	if !checkPostgresTableExists(wrappedData) {
-		c.Log.Info().Msg("Table does not exist, creating table")
+		c.Log.Info().Msg("table does not exist, creating table")
 		schema := getSchema(data)
 		var columns []string
 		for k, v := range schema {
@@ -127,13 +127,14 @@ func createPostgresTable(c Config, data interface{}) error {
 		}
 
 		statement := fmt.Sprintf("CREATE TABLE %s (%s)", tableName, strings.Join(columns, ","))
+		c.Log.Info().Msg(statement)
 		result := PostgresClient.Exec(statement)
 		if result.Error != nil {
 			return result.Error
 		}
-		c.Log.Info().Msg("Table created")
+		c.Log.Info().Msg("table created")
 	} else {
-		c.Log.Info().Msg("Table already exists")
+		c.Log.Info().Msg("table already exists")
 	}
 	return nil
 }
@@ -149,6 +150,8 @@ func buildPostgresDSN(config PostgresConfig) string {
 }
 
 func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
+	// config.Log.Info().Msgf("connecting with dsn: %s", buildPostgresDSN(config))
+	fmt.Printf("connecting with dsn: %s\n", buildPostgresDSN(config))
 	db, err := gorm.Open(postgres.Open(buildPostgresDSN(config)), &gorm.Config{})
 	if err != nil {
 		return nil, err
