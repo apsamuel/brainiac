@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"net/http"
 )
 
 type Storer[T any] interface {
@@ -25,4 +26,11 @@ type Item struct {
 	Destination string
 	Attributes  []byte
 	Value       Schema
+}
+
+type Route struct {
+	Endpoint string
+	Methods  []string
+	Handler  http.HandlerFunc
+	Auth     string
 }
