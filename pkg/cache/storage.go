@@ -3,6 +3,7 @@ package cache
 import "errors"
 
 func MakeStorage(c Config) (RedisStorage, error) {
+	c.Log.Info().Msg("configuring cache storage")
 	switch c.Options.Engine {
 	case "redis":
 		storage, err := newRedisStorage(c.Options.Redis)
