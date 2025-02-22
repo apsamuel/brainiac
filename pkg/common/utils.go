@@ -6,7 +6,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func ReadConfigFile(filename string, c any) (any, error) {
+func ParseConfig(filename string, c any) (any, error) {
+	if c == nil {
+		c = make(map[string]interface{})
+	}
 
 	data, err := os.ReadFile(filename)
 	if err != nil {

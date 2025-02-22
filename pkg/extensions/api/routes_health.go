@@ -14,12 +14,10 @@ type Response struct {
 }
 
 type HealthPage struct {
-	PageName string  `json:"page_name" yaml:"page_name"`
-	Config   *Config `yaml:"api" json:"config"`
-	// Handler    *Handler       `json:"handler" yaml:"handler"`
+	PageName   string         `json:"page_name" yaml:"page_name"`
+	Config     *Config        `yaml:"api" json:"config"`
 	JavaScript []template.JS  `json:"javascript" yaml:"javascript"`
 	Style      []template.CSS `json:"style" yaml:"style"`
-	// Template   string         `json:"template" yaml:"template"`
 }
 
 func (h *Agent) Health(w http.ResponseWriter, r *http.Request) {
@@ -40,16 +38,9 @@ func (h *Agent) Health(w http.ResponseWriter, r *http.Request) {
 			Config:     h.Config,
 			JavaScript: nil,
 			Style:      nil,
-			// Template:   "health",
-			// Handler:  h,
 		})
 		if err != nil {
 			h.Config.Log.Error().Err(err).Msg("failed to write response")
 		}
 	}
-	// w.Header().Set("Content-Type", "application/json")
-	// _, err := w.Write(b)
-	// if err != nil {
-	// 	h.Config.Log.Error().Err(err).Msg("failed to write response")
-	// }
 }

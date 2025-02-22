@@ -52,8 +52,6 @@ func (h *Agent) MakeRouter() error {
 		},
 	}
 	h.Templater = template.Must(template.New("index").Funcs(functionMap).ParseGlob(fmt.Sprintf("%s/*.html", h.Config.Options.TemplateDir)))
-	// h.EndpointMethodHandlerMap = make(map[string]MethodHandleFuncs)
-	// _ = h.AddRoute("/health", []string{"GET"}, h.Health, "public")
 	return nil
 }
 

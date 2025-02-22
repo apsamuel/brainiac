@@ -32,7 +32,7 @@ type Config struct {
 	Log     *zerolog.Logger
 }
 
-func (c *Config) Configure(filename string) error {
+func (c *Config) ConfigureFromFile(filename string) error {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return err

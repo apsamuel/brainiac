@@ -22,6 +22,23 @@ type PostgresStore[T any] struct {
 	tableName   string
 }
 
+func (s *PostgresStore[T]) PushConfig(data T) error {
+	err := PostgresClient.Save(&data).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *PostgresStore[T]) RetrieveConfig() ([]T, error) {
+	var data []T
+	err := PostgresClient.First(&data).Error
+	if err != nil {
+		return data, err
+	}
+	return data, nil
+}
+
 func (s *PostgresStore[T]) Retrieve(query string) ([]T, error) {
 	return nil, nil
 }
@@ -36,6 +53,14 @@ func (s *PostgresStore[T]) VectorSearch(queryVector []float64) ([]T, error) {
 
 func (s *PostgresStore[T]) ExecuteQuery(ctx context.Context, query string, args ...interface{}) ([]interface{}, error) {
 	return nil, nil
+}
+
+func (s *PostgresStore[T]) Save(data T) error {
+	result := PostgresClient.Save(&data)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 type Float64Slice []float64
