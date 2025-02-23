@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"fmt"
 
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -108,14 +107,6 @@ func DecryptWithCFB(data string, key []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
-func GenerateRandomString(n int) string {
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
-		return ""
-	}
-	return fmt.Sprintf("%X", b)[:n]
-}
-
 func GenerateSecret(keySize int, nonceSize int) (string, string, error) {
 	// generate a random string of characters of a given length
 	if keySize == 0 {
@@ -126,8 +117,8 @@ func GenerateSecret(keySize int, nonceSize int) (string, string, error) {
 	}
 
 	//
-	key := GenerateRandomString(keySize)
-	nonce := GenerateRandomString(nonceSize)
+	key := GetRandomString(keySize)
+	nonce := GetRandomString(nonceSize)
 	return key, nonce, nil
 }
 

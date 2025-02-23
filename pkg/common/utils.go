@@ -1,23 +1,21 @@
 package common
 
 import (
-	"os"
+	"crypto/rand"
+	"fmt"
 
-	"gopkg.in/yaml.v2"
+	"github.com/google/uuid"
 )
 
-func ParseConfig(filename string, c any) (any, error) {
-	if c == nil {
-		c = make(map[string]interface{})
+func GetRandomString(n int) string {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return ""
 	}
+	return fmt.Sprintf("%X", b)[:n]
+}
 
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	err = yaml.Unmarshal(data, &c)
-	if err != nil {
-		return nil, err
-	}
-	return c, nil
+func GetUUID() string {
+	id := uuid.New()
+	return id.String()
 }

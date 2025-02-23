@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
+	// "github.com/apsamuel/brainiac/pkg/database"
 	"gopkg.in/yaml.v2"
 )
 
@@ -135,3 +136,42 @@ func (c *Config) String() string {
 	}
 	return string(jsonMap)
 }
+
+func ParseConfig(filename string, c any) (any, error) {
+	if c == nil {
+		c = make(map[string]interface{})
+	}
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = yaml.Unmarshal(data, &c)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+// storage := database.NewPostgresStorage(database.PostgresConfig{
+// 	Host:        configHost,
+// 	Port:        configPort,
+// 	Username:    configUser,
+// 	Password:    configPassword,
+// 	DatasetName: configDatabase,
+// }, configTable)
+// client, err := database.NewPostgresClient(database.PostgresConfig{
+// 	Host:        configHost,
+// 	Port:        configPort,
+// 	Username:    configUser,
+// 	Password:    configPassword,
+// 	DatasetName: configDatabase,
+// })
+// if err != nil {
+// 	return err
+// }
+// if err != nil {
+// 	return err
+// }
+// return nil
+// }

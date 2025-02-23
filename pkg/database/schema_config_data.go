@@ -3,12 +3,13 @@ package database
 import (
 	"encoding/json"
 	"reflect"
+	"time"
 )
 
 type ConfigDataSchema struct {
-	Id      string `json:"id"`
-	Data    string `json:"data"`
-	Version string `json:"version"`
+	Id        string    `json:"id"`
+	Data      string    `json:"data"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (t ConfigDataSchema) TableName() string {
@@ -60,6 +61,15 @@ func (t ConfigDataSchema) String() string {
 	return string(jsonBytes)
 }
 
-func (s *Storage) PushConfigData(data ConfigDataSchema) error {
-	return s.ConfigData.Save(data)
-}
+// func (s *Storage) PushConfig(data []byte, aesKey string, nonce string) error {
+// 	cipherText, err := common.EncryptWithAESGCM(data, []byte(aesKey))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	configData := ConfigDataSchema{
+// 		Id:        common.GetUUID(),
+// 		Data:      string(cipherText),
+// 		CreatedAt: common.GetTimeNowUTC(),
+// 	}
+// 	return s.ConfigData.Save(configData)
+// }

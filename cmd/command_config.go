@@ -9,6 +9,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var supportedEngines = []string{"postgres", "redis"}
+
 var configCommand = &cobra.Command{
 	Use:   "config",
 	Short: "Brainiac configuration",
@@ -41,6 +43,33 @@ var configCommand = &cobra.Command{
 		}
 
 		if configWrite {
+			configEngine := os.Getenv("BRAINIAC_CONFIG_ENGINE")
+			if configEngine == "" {
+				panic("BRAINIAC_CONFIG_ENGINE not set")
+			}
+			if !common.Contains(supportedEngines, configEngine) {
+				panic("unsupported engine")
+			}
+			configHost := os.Getenv("BRAINIAC_CONFIG_HOST")
+			if configHost == "" {
+				panic("BRAINIAC_CONFIG_HOST not set")
+			}
+			configPort := os.Getenv("BRAINIAC_CONFIG_PORT")
+			if configPort == "" {
+				panic("BRAINIAC_CONFIG_PORT not set")
+			}
+			configDatabase := os.Getenv("BRAINIAC_CONFIG_DB")
+			if configDatabase == "" {
+				panic("BRAINIAC_CONFIG_DB not set")
+			}
+			configUsername := os.Getenv("BRAINIAC_CONFIG_USER")
+			if configUsername == "" {
+				panic("BRAINIAC_CONFIG_USER not set")
+			}
+			configPassword := os.Getenv("BRAINIAC_CONFIG_PASS")
+			if configPassword == "" {
+				panic("BRAINIAC_CONFIG_PASS not set")
+			}
 			configKey := os.Getenv("BRAINIAC_AES_KEY")
 			if configKey == "" {
 				panic("BRAINIAC_AES_KEY not set")

@@ -184,7 +184,7 @@ func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
 	return db, nil
 }
 
-func newPostgresStorage[T any](config Config, tableName string) common.Storer[T] {
+func NewPostgresStorage[T any](config Config, tableName string) common.Storer[T] {
 	var schema T
 	if err := createPostgresTable(config, schema); err != nil {
 		config.Log.Error().Msgf("error creating table %s", tableName)
