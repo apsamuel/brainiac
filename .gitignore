@@ -28,3 +28,4 @@ go.work
 
 brainiac
 config/brainiac.yaml
+.env*
