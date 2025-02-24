@@ -8,7 +8,7 @@
       branches:
         - master
   jobs:
-    # run trufflehog on all files in the repository
+    # identify & flag secrets in plaintext in the codebase
     trufflehog:
       runs-on: ubuntu-latest
       steps:
