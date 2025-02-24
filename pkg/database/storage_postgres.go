@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/apsamuel/brainiac/pkg/common"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -140,7 +139,7 @@ func getSchema(data interface{}) map[string]string {
 }
 
 func createPostgresTable(c Config, data interface{}) error {
-	tableName := data.(common.Schema).TableName()
+	tableName := data.(Schema).TableName()
 	wrappedData := wrapFloat64SliceFields(data)
 	if !checkPostgresTableExists(wrappedData) {
 		c.Log.Info().Msg("table does not exist, creating table")
@@ -184,7 +183,7 @@ func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
 	return db, nil
 }
 
-func NewPostgresStorage[T any](config Config, tableName string) common.Storer[T] {
+func NewPostgresStorage[T any](config Config, tableName string) Storer[T] {
 	var schema T
 	if err := createPostgresTable(config, schema); err != nil {
 		config.Log.Error().Msgf("error creating table %s", tableName)

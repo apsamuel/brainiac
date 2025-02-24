@@ -5,15 +5,14 @@ import (
 	"fmt"
 
 	"github.com/apsamuel/brainiac/pkg/cache"
-	"github.com/apsamuel/brainiac/pkg/common"
 	"github.com/apsamuel/brainiac/pkg/database"
 	"github.com/apsamuel/brainiac/pkg/http"
 )
 
 type Agent struct {
 	Config    *Config
-	Channel   chan common.Item
-	Observers map[string]chan common.Item
+	Channel   chan database.Item
+	Observers map[string]chan database.Item
 	Storage   *database.Storage
 	Cache     *cache.RedisStorage
 }
@@ -98,7 +97,7 @@ type GenerateRequest struct {
 	Options map[string]interface{} `json:"options,omitempty"`
 }
 
-func (h *Agent) Consume(channel chan common.Item) error {
+func (h *Agent) Consume(channel chan database.Item) error {
 	for item := range channel {
 		fmt.Printf("Received event: %v", item)
 	}

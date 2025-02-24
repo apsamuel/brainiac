@@ -23,18 +23,18 @@ type Agent struct {
 	EndpointMethodHandlerMap map[string]*common.Route
 	Storage                  *database.Storage
 	Cache                    *cache.RedisStorage
-	Observers                map[string]chan common.Item
+	Observers                map[string]chan database.Item
 	Templater                *template.Template
 }
 
-func (h *Agent) ConsumeEvents(eventChannel chan common.Item) error {
+func (h *Agent) ConsumeEvents(eventChannel chan database.Item) error {
 	for item := range eventChannel {
 		h.Config.Log.Info().Msgf("Received event: %v", item)
 	}
 	return nil
 }
 
-func (h *Agent) ToEventChannel(item common.Item) {
+func (h *Agent) ToEventChannel(item database.Item) {
 	c, ok := h.Observers[item.Destination]
 	if !ok {
 		h.Config.Log.Error().Msg("Observer not found")

@@ -7,11 +7,11 @@ import (
 type Storage struct {
 	Name         string
 	Type         string
-	TrainingData common.Storer[TrainingDataSchema]
-	ConfigData   common.Storer[ConfigDataSchema]
+	TrainingData Storer[TrainingDataSchema]
+	ConfigData   Storer[ConfigDataSchema]
 }
 
-func newStorage[T any](c Config, tableName string) common.Storer[T] {
+func newStorage[T any](c Config, tableName string) Storer[T] {
 	switch c.Options.Engine {
 	case "postgres":
 		return NewPostgresStorage[T](c, tableName)
@@ -47,12 +47,21 @@ func PushConfig(
 		Password:    configPassword,
 		DatasetName: configDatabase,
 	}
-	NewPostgresStorage[ConfigDataSchema](Config{
+	storage := NewPostgresStorage[ConfigDataSchema](Config{
 		Options: Options{
 			Dataset:  configDatabase,
 			Engine:   "postgres",
 			Postgres: postgresOptions,
 		},
 	}, configTable)
+	cipherText, err := common.EncryptWithAESGCM(data, []byte(aesKey))
+	if err != nil {
+		return err
+	}
+	storage.Save(ConfigDataSchema{
+		Id:        common.GetUUID(),
+		Data:      cipherText,
+		CreatedAt: common.GetTimeNowUTC(),
+	})
 	return nil
 }

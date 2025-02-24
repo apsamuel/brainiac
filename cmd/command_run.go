@@ -22,9 +22,9 @@ var runCommand = &cobra.Command{
 
 		// debug brainiacConfig
 
-		observerChannels := make(map[string]chan common.Item)
+		observerChannels := make(map[string]chan database.Item)
 		for _, observer := range []string{"api", "proxy"} {
-			observerChannels[observer] = make(chan common.Item)
+			observerChannels[observer] = make(chan database.Item)
 		}
 		l := logger.Logger
 		l.Logger.Info().Msg("starting brainiac")
