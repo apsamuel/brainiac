@@ -1,7 +1,6 @@
 package database
 
 import (
-	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -21,23 +20,6 @@ type PostgresStore[T any] struct {
 	tableName   string
 }
 
-func (s *PostgresStore[T]) PushConfig(data T) error {
-	err := PostgresClient.Save(&data).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *PostgresStore[T]) RetrieveConfig() ([]T, error) {
-	var data []T
-	err := PostgresClient.First(&data).Error
-	if err != nil {
-		return data, err
-	}
-	return data, nil
-}
-
 func (s *PostgresStore[T]) Retrieve(query string) ([]T, error) {
 	return nil, nil
 }
@@ -50,16 +32,33 @@ func (s *PostgresStore[T]) VectorSearch(queryVector []float64) ([]T, error) {
 	return nil, nil
 }
 
-func (s *PostgresStore[T]) ExecuteQuery(ctx context.Context, query string, args ...interface{}) ([]interface{}, error) {
-	return nil, nil
+func (s *PostgresStore[T]) ExecuteQuery(query string, args ...interface{}) ([]interface{}, error) {
+	rows, err := PostgresClient.Raw(query, args).Rows()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []interface{}
+	for rows.Next() {
+		var result interface{}
+		if err := rows.Scan(&result); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return results, nil
 }
 
-func (s *PostgresStore[T]) Save(data T) error {
+func (s *PostgresStore[T]) Save(data T) (*gorm.DB, error) {
 	result := PostgresClient.Save(&data)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
-	return nil
+	return result, nil
 }
 
 type Float64Slice []float64
@@ -131,18 +130,17 @@ func getSchema(data interface{}) map[string]string {
 			m[field.Name] = "integer"
 		}
 		if field.Type.String() == "bool" {
-			m[field.Name] = "integer"
+			m[field.Name] = "boolean"
 		}
 	}
 	return m
 }
 
 func createPostgresTable(c Config, data interface{}) error {
-	// c.Log.Info().Msg(fmt.Sprintf("Checking if table %s exists", "the table..."))
 	tableName := data.(Schema).TableName()
-	// wrappedData := wrapFloat64SliceFields(data)
+	wrappedData := wrapFloat64SliceFields(data)
 
-	if !checkPostgresTableExists(data) {
+	if !checkPostgresTableExists(wrappedData) {
 		c.Log.Info().Msg("table does not exist, creating table")
 		schema := getSchema(data)
 		var columns []string

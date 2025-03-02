@@ -7,9 +7,11 @@ import (
 )
 
 type ConfigDataSchema struct {
+	// Id should be the primary key
 	Id        string    `json:"id" gorm:"column:Id"`
 	Data      string    `json:"data" gorm:"column:Data"`
 	CreatedAt time.Time `json:"created_at" gorm:"column:CreatedAt"`
+	Active    bool      `json:"active" gorm:"column:Active"`
 }
 
 func (t ConfigDataSchema) TableName() string {

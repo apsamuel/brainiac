@@ -46,11 +46,12 @@ var configCommand = &cobra.Command{
 
 		if configWrite {
 			if !common.Contains(supportedEngines, configEngine) {
-				panic(fmt.Sprintf("unsupported engine: %s", configEngine))
+				panic(fmt.Sprintf("unsupported configuration engine: %s", configEngine))
 			}
 
+			l.Logger.Info().Msgf("writing configuration to %s", configEngine)
 			if configEngine == "postgres" {
-				l.Logger.Info().Msg("writing configuration to postgres")
+
 				configHost := os.Getenv("BRAINIAC_CONFIG_HOST")
 				if configHost == "" {
 					panic("BRAINIAC_CONFIG_HOST not set")
@@ -99,7 +100,6 @@ var configCommand = &cobra.Command{
 			}
 
 			if configEngine == "redis" {
-				l.Logger.Info().Msg("writing configuration to redis")
 				configHost := os.Getenv("BRAINIAC_CONFIG_HOST")
 				if configHost == "" {
 					panic("BRAINIAC_CONFIG_HOST not set")

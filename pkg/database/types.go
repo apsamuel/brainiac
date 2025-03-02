@@ -1,6 +1,6 @@
 package database
 
-import "context"
+import "gorm.io/gorm"
 
 type Schema interface {
 	String() string
@@ -16,11 +16,13 @@ type Item struct {
 	Value       Schema
 }
 
+/*
+Storer is an interface that defines the methods that a storage system should implement.
+*/
 type Storer[T any] interface {
-	Save(data T) error
+	Save(data T) (*gorm.DB, error)
 	Retrieve(query string) ([]T, error)
 	RetrieveById(id string) ([]T, error)
 	VectorSearch(queryVector []float64) ([]T, error)
-	ExecuteQuery(ctx context.Context, query string, args ...interface{}) ([]interface{}, error)
-	PushConfig(data T) error
+	ExecuteQuery(query string, args ...interface{}) ([]interface{}, error)
 }

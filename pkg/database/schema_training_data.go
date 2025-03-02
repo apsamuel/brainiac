@@ -7,7 +7,7 @@ import (
 )
 
 type TrainingDataSchema struct {
-	Id             string    `gorm:"column:ID" json:"id"`
+	Id             string    `gorm:"column:ID;primaryKey" json:"id"`
 	EmbeddingId    string    `gorm:"column:EmbeddingId" json:"embedding_id"`
 	Embedding      []float64 `gorm:"column:Embedding;type:bytes" json:"embedding"`
 	EmbeddingModel string    `gorm:"column:EmbeddingModel" json:"embedding_model"`
