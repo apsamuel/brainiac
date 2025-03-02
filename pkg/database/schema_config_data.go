@@ -7,9 +7,9 @@ import (
 )
 
 type ConfigDataSchema struct {
-	Id        string    `json:"id"`
-	Data      string    `json:"data"`
-	CreatedAt time.Time `json:"created_at"`
+	Id        string    `json:"id" gorm:"column:Id"`
+	Data      string    `json:"data" gorm:"column:Data"`
+	CreatedAt time.Time `json:"created_at" gorm:"column:CreatedAt"`
 }
 
 func (t ConfigDataSchema) TableName() string {
@@ -60,16 +60,3 @@ func (t ConfigDataSchema) String() string {
 	}
 	return string(jsonBytes)
 }
-
-// func (s *Storage) PushConfig(data []byte, aesKey string, nonce string) error {
-// 	cipherText, err := common.EncryptWithAESGCM(data, []byte(aesKey))
-// 	if err != nil {
-// 		return err
-// 	}
-// 	configData := ConfigDataSchema{
-// 		Id:        common.GetUUID(),
-// 		Data:      string(cipherText),
-// 		CreatedAt: common.GetTimeNowUTC(),
-// 	}
-// 	return s.ConfigData.Save(configData)
-// }

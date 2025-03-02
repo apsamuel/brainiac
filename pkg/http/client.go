@@ -57,8 +57,6 @@ func NewTracedGetRequestWithContext(ctx context.Context, baseUrl string, headers
 		},
 		ConnectDone: func(net, addr string, err error) {
 			if err != nil {
-				//log.Fatalf("unable to connect to host %v: %v", addr, err)
-				//fmt.Println(err.Error())
 				return
 			}
 			s.dialDoneTime = time.Now()
@@ -183,8 +181,6 @@ func (c *ApiClient) Query(
 	}
 
 	if apiResponse.Body != nil {
-		// TODO remove this print statement after debugging done
-		//fmt.Println(string(apiResponse.Body))
 		err := json.Unmarshal(apiResponse.Body, &response)
 		if err != nil {
 			return nil, errors.New("failed_to_unmarshal_response_body=" + string(apiResponse.Body))

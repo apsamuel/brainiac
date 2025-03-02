@@ -9,18 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisConfig struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	Password string `yaml:"password" json:"-"`
-	Database int    `yaml:"database"`
-}
-
-type RedisStorage struct {
-	client *redis.Client
-}
-
-func (r *RedisStorage) Set(ctx context.Context, key string, value interface{}, expiration int) error {
+func (r *RedisStorage) Set(ctx context.Context, key string, value any, expiration int) error {
 	return r.client.Set(ctx, key, value, time.Duration(expiration)).Err()
 }
 

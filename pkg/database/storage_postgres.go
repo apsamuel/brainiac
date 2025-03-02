@@ -98,8 +98,9 @@ func wrapFloat64SliceFields(data interface{}) interface{} {
 	return wrappedStruct.Addr().Interface()
 }
 
-func checkPostgresTableExists(data interface{}) bool {
-	return PostgresClient.Migrator().HasTable(data)
+func checkPostgresTableExists(data any) bool {
+	migrator := PostgresClient.Migrator()
+	return migrator.HasTable(data)
 }
 
 func getSchema(data interface{}) map[string]string {
@@ -108,7 +109,6 @@ func getSchema(data interface{}) map[string]string {
 	t := v.Type()
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
-		// v = v.Elem()
 	}
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
@@ -133,15 +133,16 @@ func getSchema(data interface{}) map[string]string {
 		if field.Type.String() == "bool" {
 			m[field.Name] = "integer"
 		}
-		// m[t.Field(i).Name] = t.Field(i).Tag.Get("gorm")
 	}
 	return m
 }
 
 func createPostgresTable(c Config, data interface{}) error {
+	// c.Log.Info().Msg(fmt.Sprintf("Checking if table %s exists", "the table..."))
 	tableName := data.(Schema).TableName()
-	wrappedData := wrapFloat64SliceFields(data)
-	if !checkPostgresTableExists(wrappedData) {
+	// wrappedData := wrapFloat64SliceFields(data)
+
+	if !checkPostgresTableExists(data) {
 		c.Log.Info().Msg("table does not exist, creating table")
 		schema := getSchema(data)
 		var columns []string
@@ -174,8 +175,6 @@ func buildPostgresDSN(config PostgresConfig) string {
 }
 
 func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
-	// config.Log.Info().Msgf("connecting with dsn: %s", buildPostgresDSN(config))
-	fmt.Printf("connecting with dsn: %s\n", buildPostgresDSN(config))
 	db, err := gorm.Open(postgres.Open(buildPostgresDSN(config)), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -185,6 +184,7 @@ func NewPostgresClient(config PostgresConfig) (*gorm.DB, error) {
 
 func NewPostgresStorage[T any](config Config, tableName string) Storer[T] {
 	var schema T
+
 	if err := createPostgresTable(config, schema); err != nil {
 		config.Log.Error().Msgf("error creating table %s", tableName)
 	}

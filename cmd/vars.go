@@ -7,11 +7,11 @@ const keySize = 32
 const nonceSize = 12
 
 var (
+	configEngine   string
 	configFile     string
 	configHost     string
 	configPort     int
 	configWrite    bool
-	configDebug    bool
 	debug          bool
 	generateSecret bool
 )
