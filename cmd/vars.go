@@ -11,7 +11,10 @@ var (
 	configFile     string
 	configHost     string
 	configPort     int
+	configDatabase string
+	configTable    string
 	configWrite    bool
+	configRead     bool
 	debug          bool
 	generateSecret bool
 )

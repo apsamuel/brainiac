@@ -18,7 +18,10 @@ func init() {
 	rootCommand.PersistentFlags().StringVarP(&configFile, "configYaml", "c", "", "configuration file")
 	// TODO: use host:port string instead of separate flags
 	rootCommand.PersistentFlags().StringVarP(&configHost, "configHost", "H", "localhost", "configuration host")
-	rootCommand.PersistentFlags().IntVarP(&configPort, "configPort", "p", 8080, "configuration port")
+	// TODO: understand why configPort is never set
+	rootCommand.PersistentFlags().IntVarP(&configPort, "configPort", "p", 5432, "configuration port")
+	rootCommand.PersistentFlags().StringVarP(&configDatabase, "configDatabase", "D", "observability", "configuration database")
+	rootCommand.PersistentFlags().StringVarP(&configTable, "configTable", "t", "config_data", "configuration table or key")
 	rootCommand.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "enable debugging")
 
 	rootCommand.AddCommand(runCommand)

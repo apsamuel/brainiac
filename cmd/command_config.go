@@ -136,10 +136,72 @@ var configCommand = &cobra.Command{
 
 			return
 		}
+
+		if configRead {
+			if !common.Contains(supportedEngines, configEngine) {
+				panic(fmt.Sprintf("unsupported configuration engine: %s", configEngine))
+			}
+
+			l.Logger.Info().Msgf("reading configuration from %s", configEngine)
+			if configEngine == "postgres" {
+				configHost := os.Getenv("BRAINIAC_CONFIG_HOST")
+				if configHost == "" {
+					panic("BRAINIAC_CONFIG_HOST not set")
+				}
+				configPortStr := os.Getenv("BRAINIAC_CONFIG_PORT")
+				if configPortStr == "" {
+					panic("BRAINIAC_CONFIG_PORT not set")
+				} else {
+					configPort, err = strconv.Atoi(configPortStr)
+					if err != nil {
+						panic(err)
+					}
+				}
+				configDatabase := os.Getenv("BRAINIAC_CONFIG_DB")
+				if configDatabase == "" {
+					panic("BRAINIAC_CONFIG_DB not set")
+				}
+				configUsername := os.Getenv("BRAINIAC_CONFIG_USER")
+				if configUsername == "" {
+					panic("BRAINIAC_CONFIG_USER not set")
+				}
+				configPassword := os.Getenv("BRAINIAC_CONFIG_PASS")
+				if configPassword == "" {
+					panic("BRAINIAC_CONFIG_PASS not set")
+				}
+				configKey := os.Getenv(aesKeyVariable)
+				if configKey == "" {
+					panic(fmt.Sprintf("%s not set", aesKeyVariable))
+				}
+				configNonce := os.Getenv(aesNonceVariable)
+				if configNonce == "" {
+					panic(fmt.Sprintf("%s not set", aesNonceVariable))
+				}
+
+				config, err := database.RetrieveConfig(
+					configHost,
+					configPort,
+					configDatabase,
+					"config_data",
+					configUsername,
+					configPassword,
+					configKey,
+					configNonce,
+				)
+				if err != nil {
+					panic(err)
+				}
+				l.Logger.Info().Interface("config", string(config)).Msg("retrieved configuration")
+			}
+
+			if configEngine == "redis" {
+			}
+		}
 	},
 }
 
 func init() {
 	configCommand.Flags().BoolVarP(&configWrite, "writeConfig", "w", false, "write configuration")
+	configCommand.Flags().BoolVarP(&configRead, "readConfig", "r", false, "read configuration")
 	configCommand.Flags().BoolVarP(&generateSecret, "getSecret", "g", false, "generate brainiac secret")
 }
