@@ -151,7 +151,10 @@ GetObservers returns a map of observer channels for each marked observer in the 
 func GetObservers(jsonConfig map[string]interface{}) map[string]chan Item {
 	observerChannels := make(map[string]chan Item)
 	for key := range jsonConfig {
-		observerChannels[key] = make(chan Item)
+		if enabled := jsonConfig["extension"] == true; enabled {
+			observerChannels[key] = make(chan Item)
+		}
+		// observerChannels[key] = make(chan Item)
 	}
 	return observerChannels
 }
