@@ -29,7 +29,7 @@ type Agent struct {
 
 func (h *Agent) ConsumeEvents(eventChannel chan database.Item) error {
 	for item := range eventChannel {
-		h.Config.Log.Info().Msgf("Received event: %v", item)
+		h.Config.Log.Info().Msgf("received event: %v", item)
 	}
 	return nil
 }
@@ -37,7 +37,7 @@ func (h *Agent) ConsumeEvents(eventChannel chan database.Item) error {
 func (h *Agent) ToEventChannel(item database.Item) {
 	c, ok := h.Observers[item.Destination]
 	if !ok {
-		h.Config.Log.Error().Msg("Observer not found")
+		h.Config.Log.Error().Msg("observer not found")
 		return
 	}
 
