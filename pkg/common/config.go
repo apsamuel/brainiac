@@ -5,6 +5,7 @@ import (
 	"os"
 
 	// "github.com/apsamuel/brainiac/pkg/database"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -78,16 +79,18 @@ type Config struct {
 	Cache    CacheConfigV2    `json:"cache" yaml:"cache"`
 }
 
-func (c *Config) GetOptions() map[string]interface{} {
-	// return a list of defined option keys
-	return map[string]interface{}{
-		"api":      c.Api,
-		"ai":       c.Ai,
-		"database": c.Database,
-		"cache":    c.Cache,
-	}
-}
+// func (c *Config) GetOptions() map[string]interface{} {
+// 	return map[string]interface{}{
+// 		"api":      c.Api,
+// 		"ai":       c.Ai,
+// 		"database": c.Database,
+// 		"cache":    c.Cache,
+// 	}
+// }
 
+/*
+ToInterface converts a Config struct to an interface
+*/
 func (c *Config) ToInterface() (map[string]interface{}, error) {
 	jsonConfig := make(map[string]interface{})
 	jsonMap, err := json.Marshal(c)
@@ -101,6 +104,11 @@ func (c *Config) ToInterface() (map[string]interface{}, error) {
 	return jsonConfig, nil
 }
 
+/*
+FromInterface configures a Config struct from an interface with the internal structure of `map[string]any`
+
+- jsonConfig: the interface with the internal structure of `map[string]any`
+*/
 func (c *Config) FromInterface(jsonConfig map[string]interface{}) (Config, error) {
 	jsonMap, err := json.Marshal(jsonConfig)
 	if err != nil {
@@ -113,6 +121,37 @@ func (c *Config) FromInterface(jsonConfig map[string]interface{}) (Config, error
 	return *c, nil
 }
 
+/*
+FromString configures a Config struct from a YAML encoded string
+
+- yamlConfig: the YAML encoded string
+*/
+func (c *Config) FromString(yamlConfig string) (Config, error) {
+	err := yaml.Unmarshal([]byte(yamlConfig), &c)
+	if err != nil {
+		return Config{}, err
+	}
+	return *c, nil
+}
+
+/*
+FromBytes configures a Config struct from a YAML encoded byte slice
+
+- yamlConfig: the YAML encoded byte slice
+*/
+func (c *Config) FromBytes(yamlConfig []byte) (Config, error) {
+	err := yaml.Unmarshal(yamlConfig, &c)
+	if err != nil {
+		return Config{}, err
+	}
+	return *c, nil
+}
+
+/*
+FromFile configures a Config struct from a YAML file
+
+- filename: the path to the YAML configuration file
+*/
 func (c *Config) FromFile(filename string) (Config, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
@@ -125,6 +164,9 @@ func (c *Config) FromFile(filename string) (Config, error) {
 	return *c, nil
 }
 
+/*
+String converts a Config struct to a YAML encoded string
+*/
 func (c *Config) String() string {
 	jsonConfig, err := c.ToInterface()
 	if err != nil {
@@ -137,6 +179,13 @@ func (c *Config) String() string {
 	return string(jsonMap)
 }
 
+/*
+ParseConfig parses a YAML configuration and returns the provided type
+
+- filename: the path to the YAML configuration file
+
+- c: the type to return
+*/
 func ParseConfig(filename string, c any) (any, error) {
 	if c == nil {
 		c = make(map[string]interface{})
@@ -152,26 +201,3 @@ func ParseConfig(filename string, c any) (any, error) {
 	}
 	return c, nil
 }
-
-// storage := database.NewPostgresStorage(database.PostgresConfig{
-// 	Host:        configHost,
-// 	Port:        configPort,
-// 	Username:    configUser,
-// 	Password:    configPassword,
-// 	DatasetName: configDatabase,
-// }, configTable)
-// client, err := database.NewPostgresClient(database.PostgresConfig{
-// 	Host:        configHost,
-// 	Port:        configPort,
-// 	Username:    configUser,
-// 	Password:    configPassword,
-// 	DatasetName: configDatabase,
-// })
-// if err != nil {
-// 	return err
-// }
-// if err != nil {
-// 	return err
-// }
-// return nil
-// }
