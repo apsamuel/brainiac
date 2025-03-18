@@ -24,5 +24,5 @@ type Storer[T any] interface {
 	Retrieve(query string) ([]T, error)
 	RetrieveById(id string) ([]T, error)
 	VectorSearch(queryVector []float64) ([]T, error)
-	ExecuteQuery(query string, args ...interface{}) ([]interface{}, error)
+	ExecuteQuery(query string, args ...interface{}) ([]map[string]interface{}, error)
 }

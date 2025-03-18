@@ -7,20 +7,20 @@ import (
 )
 
 type TrainingDataSchema struct {
-	Id             string    `gorm:"column:ID;primaryKey" json:"id"`
-	EmbeddingId    string    `gorm:"column:EmbeddingId" json:"embedding_id"`
-	Embedding      []float64 `gorm:"column:Embedding;type:bytes" json:"embedding"`
-	EmbeddingModel string    `gorm:"column:EmbeddingModel" json:"embedding_model"`
-	Source         string    `gorm:"column:Source" json:"source"`
-	SourceURL      string    `gorm:"column:SourceURL" json:"source_url"`
-	ChunksTotal    int       `gorm:"column:ChunksTotal" json:"chunks_total"`
-	ChunksIndexed  int       `gorm:"column:ChunksIndexed" json:"chunks_indexed"`
-	Content        string    `gorm:"column:Content" json:"content"`
-	CreatedAt      time.Time `gorm:"column:CreatedAt" json:"created_at"`
-	IndexedAt      time.Time `gorm:"column:IndexedAt" json:"indexed_at"`
-	IsActive       bool      `gorm:"column:IsActive" json:"is_active"`
-	Category       string    `gorm:"column:Category" json:"category"`
-	Metadata       string    `gorm:"column:Metadata" json:"metadata"`
+	Id             string    `gorm:"column:id;primaryKey" json:"id"`
+	EmbeddingId    string    `gorm:"column:embedding_id" json:"embedding_id"`
+	Embedding      []float64 `gorm:"column:embedding;type:bytes" json:"embedding"`
+	EmbeddingModel string    `gorm:"column:embedding_model" json:"embedding_model"`
+	Source         string    `gorm:"column:source" json:"source"`
+	SourceURL      string    `gorm:"column:source_url" json:"source_url"`
+	ChunksTotal    int       `gorm:"column:chunks_total" json:"chunks_total"`
+	ChunksIndexed  int       `gorm:"column:chunks_indexed" json:"chunks_indexed"`
+	Content        string    `gorm:"column:content" json:"content"`
+	CreatedAt      time.Time `gorm:"column:created_at" json:"created_at"`
+	IndexedAt      time.Time `gorm:"column:indexed_at" json:"indexed_at"`
+	IsActive       bool      `gorm:"column:is_active" json:"is_active"`
+	Category       string    `gorm:"column:category" json:"category"`
+	Metadata       string    `gorm:"column:metadata" json:"metadata"`
 }
 
 func (t TrainingDataSchema) TableName() string {

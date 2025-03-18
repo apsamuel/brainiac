@@ -1,13 +1,13 @@
 package database
 
 import (
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
-	"strings"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -32,24 +32,16 @@ func (s *PostgresStore[T]) VectorSearch(queryVector []float64) ([]T, error) {
 	return nil, nil
 }
 
-func (s *PostgresStore[T]) ExecuteQuery(query string, args ...interface{}) ([]interface{}, error) {
-	rows, err := PostgresClient.Raw(query, args).Rows()
+func (s *PostgresStore[T]) ExecuteQuery(query string, args ...interface{}) ([]map[string]interface{}, error) {
+	var results []map[string]interface{}
+	ctx := context.Background()
+	err := PostgresClient.WithContext(
+		ctx,
+	).Raw(query, args...).Scan(&results).Error
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var results []interface{}
-	for rows.Next() {
-		var result interface{}
-		if err := rows.Scan(&result); err != nil {
-			return nil, err
-		}
-		results = append(results, result)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
 	return results, nil
 }
 
@@ -137,25 +129,15 @@ func getSchema(data interface{}) map[string]string {
 }
 
 func createPostgresTable(c Config, data interface{}) error {
-	tableName := data.(Schema).TableName()
+	// tableName := data.(ConfigDataSchema).TableName()
 	wrappedData := wrapFloat64SliceFields(data)
 
 	if !checkPostgresTableExists(wrappedData) {
 		c.Log.Info().Msg("table does not exist, creating table")
-		schema := getSchema(data)
-		var columns []string
-		for k, v := range schema {
-			c.Log.Info().Msg(fmt.Sprintf("%s %s", k, v))
-			columns = append(columns, fmt.Sprintf("\"%s\" %s", k, v))
+		err := PostgresClient.AutoMigrate(wrappedData)
+		if err != nil {
+			c.Log.Info().Msg(fmt.Sprintf("error creating table %s", data))
 		}
-
-		statement := fmt.Sprintf("CREATE TABLE %s (%s)", tableName, strings.Join(columns, ","))
-		c.Log.Info().Msg(statement)
-		result := PostgresClient.Exec(statement)
-		if result.Error != nil {
-			return result.Error
-		}
-		c.Log.Info().Msg("table created")
 	} else {
 		c.Log.Info().Msg("table already exists")
 	}

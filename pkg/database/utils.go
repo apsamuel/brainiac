@@ -1,11 +1,14 @@
 package database
 
 import (
-	"fmt"
+	"encoding/json"
 
 	"github.com/apsamuel/brainiac/pkg/common"
 )
 
+/*
+RetrieveConfig retrieves the latest active configuration record from the database
+*/
 func RetrieveConfig(
 	configHost string,
 	configPort int,
@@ -45,19 +48,33 @@ func RetrieveConfig(
 	}
 
 	storage := NewStorage[ConfigDataSchema](config, "config_data")
-
-	// get the latest record by CreatedAt
-	rows, err := storage.ExecuteQuery("SELECT * FROM config_data ORDER BY CreatedAt DESC LIMIT 1")
+	rows, err := storage.ExecuteQuery("SELECT * FROM config_data WHERE active = true ORDER BY created_at DESC LIMIT 1")
 	if err != nil {
 		return nil, err
 	}
 
-	for _, row := range rows {
-		fmt.Println(row)
+	var configData ConfigDataSchema
+	// take the first record from the result set, decrypt the data field, and return it
+	if len(rows) > 0 {
+		record := rows[0]
+		// get the data field from the record
+		if recordData, ok := record["data"].(string); ok {
+			data, err := common.DecryptWithAESGCM(recordData, []byte(aesKey))
+			if err != nil {
+				return nil, err
+			}
+			return data, nil
+		}
+
+		return json.Marshal(configData)
 	}
 	return nil, nil
 
 }
+
+/*
+PushConfig pushes a new configuration record to the database
+*/
 func PushConfig(
 	configHost string,
 	configPort int,
@@ -112,12 +129,29 @@ func PushConfig(
 		Active:    true,
 	}
 	storage := NewStorage[ConfigDataSchema](config, "config_data")
+	/* set all previous records (ping active = false) */
+	if _, err := storage.ExecuteQuery("UPDATE config_data SET active = false WHERE active = true"); err != nil {
+		return err
+	}
 
 	if _, err := storage.Save(record); err != nil {
 		return err
 	}
 
-	config.Log.Info().Msgf("Record with ID %s saved successfully.", recordId)
+	config.Log.Info().Msgf("config record with ID %s saved successfully.", recordId)
 
 	return nil
+}
+
+/*
+GetObservers returns a map of observer channels for each marked observer in the configuration
+
+- observers are marked by setting the `extension` key in the configuration to `true`
+*/
+func GetObservers(jsonConfig map[string]interface{}) map[string]chan Item {
+	observerChannels := make(map[string]chan Item)
+	for key := range jsonConfig {
+		observerChannels[key] = make(chan Item)
+	}
+	return observerChannels
 }

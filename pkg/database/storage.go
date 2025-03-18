@@ -21,6 +21,7 @@ func MakeStorage(c Config) (*Storage, error) {
 	storage.Name = c.Options.Dataset
 	storage.Type = c.Options.Engine
 	storage.TrainingData = NewStorage[TrainingDataSchema](c, "training_data")
+	storage.ConfigData = NewStorage[ConfigDataSchema](c, "config_data")
 	/*
 		  This line was commented out because ConfigDataSchema is created once during the bootstrapping process and may be updated later
 			instead of being created here, we create it when brainiac is provided the config argument on the command line

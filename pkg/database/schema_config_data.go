@@ -8,10 +8,10 @@ import (
 
 type ConfigDataSchema struct {
 	// Id should be the primary key
-	Id        string    `json:"id" gorm:"column:Id"`
-	Data      string    `json:"data" gorm:"column:Data"`
-	CreatedAt time.Time `json:"created_at" gorm:"column:CreatedAt"`
-	Active    bool      `json:"active" gorm:"column:Active"`
+	Id        string    `json:"id" gorm:"column:id;primaryKey"`
+	Data      string    `json:"data" gorm:"column:data"`
+	CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
+	Active    bool      `json:"active" gorm:"column:active"`
 }
 
 func (t ConfigDataSchema) TableName() string {
@@ -52,7 +52,7 @@ func (t ConfigDataSchema) Columns() []string {
 }
 
 func (t ConfigDataSchema) GetId() string {
-	return t.Id
+	return ""
 }
 
 func (t ConfigDataSchema) String() string {
