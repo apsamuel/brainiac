@@ -217,6 +217,12 @@ var runCommand = &cobra.Command{
 		if err != nil {
 			l.Logger.Error().Msg(err.Error())
 		}
+		aiHandler := ai.Agent{
+			Config:    &aiConfig,
+			Observers: observerChannels,
+			Storage:   storage,
+			Cache:     &cacheStorage,
+		}
 		/* configure and start API server */
 		apiConfig.Log = &l.Logger
 		err = apiConfig.ConfigureFromInterface(jsonConfig)
@@ -239,6 +245,7 @@ var runCommand = &cobra.Command{
 
 		for _, agentRoutes := range [][]*common.Route{
 			apiHandler.ListRoutes(),
+			aiHandler.ListRoutes(),
 		} {
 			for _, route := range agentRoutes {
 				err := apiHandler.AddRoute(route)
