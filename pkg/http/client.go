@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"net/http/httptrace"
 	"time"
+
+	"github.com/rs/zerolog"
 )
 
 var nilResponseError = errors.New("response_empty")
@@ -22,6 +24,7 @@ type ApiClient struct {
 	Handle        http.Client
 	TracedRequest *TracedRequest
 	SentRequests  int
+	Log           *zerolog.Logger
 }
 
 // TracedRequest holds the variables that each request uses to measure latency
@@ -174,6 +177,7 @@ func (c *ApiClient) Query(
 	if err != nil {
 		if apiResponse != nil && apiResponse.Body != nil {
 			fmt.Println("httpclient error body", string(apiResponse.Body))
+			// c.Log.Error().Msgf("httpclient error body %s", string(apiResponse.Body))
 			return nil, err
 		}
 		fmt.Println("httpclient error", err.Error())

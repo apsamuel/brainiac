@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type PostgresConfigV2 struct {
+type PostgresConfig struct {
 	Host        string `json:"host" yaml:"host"`
 	Port        int    `json:"port" yaml:"port"`
 	Username    string `json:"username" yaml:"username"`
@@ -17,16 +17,16 @@ type PostgresConfigV2 struct {
 	DatasetName string `json:"dataset_name" yaml:"dataset_name"`
 }
 
-type SqliteConfigV2 struct {
+type SqliteConfig struct {
 }
 
-type RedisConfigV2 struct {
+type RedisConfig struct {
 	Host     string `json:"host" yaml:"host"`
 	Port     int    `json:"port" yaml:"port"`
 	Password string `json:"password" yaml:"password"`
 }
 
-type ApiConfigV2 struct {
+type ApiConfig struct {
 	Origins     []string `json:"origins" yaml:"origins"`
 	Host        string   `json:"host" yaml:"host"`
 	Port        int      `json:"port" yaml:"port"`
@@ -35,31 +35,45 @@ type ApiConfigV2 struct {
 	Debug       bool     `json:"debug" yaml:"debug"`
 }
 
-type PersonaConfigV2 struct {
+// type ModelPersona struct {
+// 	Model   string                 `yaml:"model" json:"model"`
+// 	System  string                 `yaml:"system" json:"system"`
+// 	Options map[string]interface{} `yaml:"ai" json:"ai"`
+// }
+
+type PersonaConfig struct {
 	Name         string                 `json:"name" yaml:"name"`
 	SystemPrompt string                 `json:"system_prompt" yaml:"system_prompt"`
 	Model        string                 `json:"model" yaml:"model"`
 	ModelOptions map[string]interface{} `json:"model_options" yaml:"model_options"`
 }
 
-type AiConfigV2 struct {
-	Engine         string            `json:"engine" yaml:"engine"`
-	EmbeddingUrl   string            `json:"embedding_url" yaml:"embedding_url"`
-	EmbeddingModel string            `json:"embedding_model" yaml:"embedding_model"`
-	GenerateUrl    string            `json:"generate_url" yaml:"generate_url"`
-	GenerateModel  string            `json:"generate_model" yaml:"generate_model"`
-	Personas       []PersonaConfigV2 `json:"personas" yaml:"personas"`
+type ModelPersona struct {
+	Model   string                 `yaml:"model" json:"model"`
+	System  string                 `yaml:"system" json:"system"`
+	Options map[string]interface{} `yaml:"ai" json:"ai"`
 }
 
-type CacheConfigV2 struct {
-	Engine string        `json:"engine" yaml:"engine"`
-	Redis  RedisConfigV2 `json:"redis" yaml:"redis"`
+type AiConfig struct {
+	Engine                string                  `yaml:"engine" json:"engine"`
+	EmbeddingApiToken     string                  `yaml:"embedding_api_token" json:"embedding_api_token"`
+	EmbeddingURL          string                  `yaml:"embedding_url" json:"embedding_url"`
+	GenerateApiToken      string                  `yaml:"generate_api_token" json:"generate_api_token"`
+	GenerateURL           string                  `yaml:"generate_url" json:"generate_url"`
+	DefaultEmbeddingModel string                  `yaml:"embedding_model" json:"embedding_model"`
+	DefaultGenerateModel  string                  `yaml:"generate_model" json:"generate_model"`
+	ModelPersonas         map[string]ModelPersona `yaml:"personas" json:"personas"`
 }
 
-type DatabaseConfigV2 struct {
-	Engine   string           `json:"engine" yaml:"engine"`
-	Postgres PostgresConfigV2 `json:"postgres" yaml:"postgres"`
-	Sqlite   SqliteConfigV2   `json:"sqlite" yaml:"sqlite"`
+type CacheConfig struct {
+	Engine string      `json:"engine" yaml:"engine"`
+	Redis  RedisConfig `json:"redis" yaml:"redis"`
+}
+
+type DatabaseConfig struct {
+	Engine   string         `json:"engine" yaml:"engine"`
+	Postgres PostgresConfig `json:"postgres" yaml:"postgres"`
+	Sqlite   SqliteConfig   `json:"sqlite" yaml:"sqlite"`
 }
 
 type ConfigInterface interface {
@@ -73,20 +87,11 @@ type ConfigInterface interface {
 }
 
 type Config struct {
-	Api      ApiConfigV2      `json:"api" yaml:"api"`
-	Ai       AiConfigV2       `json:"ai" yaml:"ai"`
-	Database DatabaseConfigV2 `json:"database" yaml:"database"`
-	Cache    CacheConfigV2    `json:"cache" yaml:"cache"`
+	Api      ApiConfig      `json:"api" yaml:"api"`
+	Ai       AiConfig       `json:"ai" yaml:"ai"`
+	Database DatabaseConfig `json:"database" yaml:"database"`
+	Cache    CacheConfig    `json:"cache" yaml:"cache"`
 }
-
-// func (c *Config) GetOptions() map[string]interface{} {
-// 	return map[string]interface{}{
-// 		"api":      c.Api,
-// 		"ai":       c.Ai,
-// 		"database": c.Database,
-// 		"cache":    c.Cache,
-// 	}
-// }
 
 /*
 ToInterface converts a Config struct to an interface

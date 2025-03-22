@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type Handler struct {
+type Agent struct {
 	Config    *Config
 	Router    *mux.Router
 	Storage   *database.Storage

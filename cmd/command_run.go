@@ -8,6 +8,7 @@ import (
 	"github.com/apsamuel/brainiac/pkg/cache"
 	"github.com/apsamuel/brainiac/pkg/common"
 	"github.com/apsamuel/brainiac/pkg/database"
+	"github.com/apsamuel/brainiac/pkg/extensions/ai"
 	"github.com/apsamuel/brainiac/pkg/extensions/api"
 	"github.com/apsamuel/brainiac/pkg/logger"
 	"github.com/spf13/cobra"
@@ -22,6 +23,7 @@ var runCommand = &cobra.Command{
 		var cacheConfig cache.Config
 		var apiConfig api.Config
 		var brainiacConfig common.Config
+		var aiConfig ai.Config
 
 		l := logger.Logger
 		l.Logger.Info().Msg("starting brainiac")
@@ -31,7 +33,16 @@ var runCommand = &cobra.Command{
 		}
 
 		var configPort int
+
+		/*
+			when a configuration file is not provided, we will assume we are loading from a backend engine such as postgres, or redis
+		*/
 		if configFile == "" {
+			/*
+				configEngine defines the configuration engine to use
+				if the value is not provided the program will panic
+				this value can be set by providing the --configEngine flag or by setting the BRAINIAC_CONFIG_ENGINE environment variable
+			*/
 			if configEngine == "postgres" {
 				l.Logger.Info().Msgf("using config host %s", configHost)
 				/*
@@ -50,6 +61,8 @@ var runCommand = &cobra.Command{
 					configPort defines the port of the configuration database server
 					if the value is not provided the program will panic
 					this value can be set by providing the --configPort flag or by setting the BRAINIAC_CONFIG_PORT environment variable
+
+					TODO: understand why configPort is never set
 				*/
 				l.Logger.Info().Msgf("using config port %d", configPort)
 				if configPort == 0 {
@@ -159,7 +172,7 @@ var runCommand = &cobra.Command{
 			}
 
 		} else {
-			l.Logger.Info().Str("config file", configFile).Msg("loading configuration file")
+			l.Logger.Info().Str("config", configFile).Msg("loading configuration file")
 			_, err := brainiacConfig.FromFile(configFile)
 			if err != nil {
 				logger.Logger.Logger.Error().Msg(err.Error())
@@ -198,6 +211,12 @@ var runCommand = &cobra.Command{
 			l.Logger.Error().Msg(err.Error())
 		}
 
+		/* configure and start the AI extension */
+		aiConfig.Log = &l.Logger
+		err = aiConfig.ConfigureFromInterface(jsonConfig)
+		if err != nil {
+			l.Logger.Error().Msg(err.Error())
+		}
 		/* configure and start API server */
 		apiConfig.Log = &l.Logger
 		err = apiConfig.ConfigureFromInterface(jsonConfig)
@@ -212,6 +231,7 @@ var runCommand = &cobra.Command{
 			Storage:   storage,
 			Cache:     &cacheStorage,
 		}
+
 		err = apiHandler.MakeRouter()
 		if err != nil {
 			l.Logger.Error().Msg(err.Error())

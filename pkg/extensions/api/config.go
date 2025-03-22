@@ -8,6 +8,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const SelfName = "api"
+
 type Options struct {
 	Origins     []string `yaml:"origins" json:"origins"`
 	Host        string   `yaml:"host" json:"host"`
@@ -18,11 +20,11 @@ type Options struct {
 }
 
 type Config struct {
-	Options Options `yaml:"api" json:"api"`
-	Log     *zerolog.Logger
+	Options Options         `yaml:"api" json:"api"`
+	Log     *zerolog.Logger `yaml:"-" json:"-"`
 }
 
-func (c *Config) Configure(filename string) error {
+func (c *Config) ConfigureFromFile(filename string) error {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return err
@@ -43,6 +45,7 @@ func (c *Config) ConfigureFromInterface(data map[string]interface{}) error {
 		return err
 	}
 
+	// c.Log.Info().Msg(string(dataBytes))
 	err = yaml.Unmarshal(dataBytes, c)
 	if err != nil {
 		return err

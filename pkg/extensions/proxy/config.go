@@ -1,5 +1,7 @@
 package proxy
 
+const SelfName = "proxy"
+
 type Options struct {
 	Debug bool `yaml:"debug"`
 }
