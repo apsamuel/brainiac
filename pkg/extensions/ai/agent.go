@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/apsamuel/brainiac/pkg/cache"
+	"github.com/apsamuel/brainiac/pkg/common"
 	"github.com/apsamuel/brainiac/pkg/database"
 	"github.com/apsamuel/brainiac/pkg/http"
 )
@@ -163,4 +164,16 @@ func (h *Agent) Embed(
 		Stats: stats,
 	}, nil
 
+}
+
+func (h *Agent) ListRoutes() []*common.Route {
+	routes := []*common.Route{
+		{
+			Endpoint: "/ai/embed",
+			Methods:  []string{"POST"},
+			Handler:  h.EmbedRequest,
+			Auth:     "public",
+		},
+	}
+	return routes
 }
