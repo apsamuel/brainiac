@@ -35,12 +35,6 @@ type ApiConfig struct {
 	Debug       bool     `json:"debug" yaml:"debug"`
 }
 
-// type ModelPersona struct {
-// 	Model   string                 `yaml:"model" json:"model"`
-// 	System  string                 `yaml:"system" json:"system"`
-// 	Options map[string]interface{} `yaml:"ai" json:"ai"`
-// }
-
 type PersonaConfig struct {
 	Name         string                 `json:"name" yaml:"name"`
 	SystemPrompt string                 `json:"system_prompt" yaml:"system_prompt"`

@@ -18,6 +18,15 @@ type Agent struct {
 	Cache     *cache.RedisStorage
 }
 
+type GenerateRequest struct {
+	Model   string                 `json:"model"`
+	Prompt  string                 `json:"prompt"`
+	Stream  bool                   `json:"stream"`
+	System  string                 `json:"system,omitempty"`
+	Context []float64              `json:"context,omitempty"`
+	Options map[string]interface{} `json:"options,omitempty"`
+}
+
 type GenerateResponse struct {
 	Model              string    `json:"model"`
 	CreatedAt          string    `json:"created_at"`
@@ -42,13 +51,35 @@ type EmbedRequest struct {
 }
 
 type EmbedResponse struct {
-	Model      string    `json:"model"`
-	Embeddings []float64 `json:"embeddings"`
+	Model      string      `json:"model"`
+	Embeddings [][]float64 `json:"embeddings"`
 }
 
 type EmbedReponseWrapper struct {
 	Embed EmbedResponse            `json:"embed"`
 	Stats *http.TracedRequestStats `json:"stats"`
+}
+
+type ChatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ChatTool struct {
+	Type string `json:"type"`
+	// Function
+}
+type ChatRequest struct {
+	Model    string                   `json:"model"`
+	Messages []ChatMessage            `json:"messages"`
+	Tools    []map[string]interface{} `json:"tools,omitempty"`
+	Options  map[string]interface{}   `json:"options,omitempty"`
+	Stream   bool                     `json:"stream"`
+	// Tools
+}
+
+type ChatResponse struct {
+	Model string `json:"model"`
 }
 
 func makeHeaders(apiToken string) map[string]string {
@@ -89,23 +120,14 @@ func makeGenerateBody(prompt, modelName, system string, context []float64) ([]by
 	return body, nil
 }
 
-type GenerateRequest struct {
-	Model   string                 `json:"model"`
-	Prompt  string                 `json:"prompt"`
-	Stream  bool                   `json:"stream"`
-	System  string                 `json:"system,omitempty"`
-	Context []float64              `json:"context,omitempty"`
-	Options map[string]interface{} `json:"options,omitempty"`
-}
-
-func (h *Agent) Consume(channel chan database.Item) error {
+func (agent *Agent) Consume(channel chan database.Item) error {
 	for item := range channel {
 		fmt.Printf("Received event: %v", item)
 	}
 	return nil
 }
 
-func (h *Agent) Generate(r GenerateRequest) (*GenerateResponseWrapper, error) {
+func (agent *Agent) Generate(r GenerateRequest) (*GenerateResponseWrapper, error) {
 	headers := makeHeaders("")
 	var response GenerateResponse
 	body, err := makeGenerateBody(r.Prompt, r.Model, r.System, r.Context)
@@ -113,7 +135,7 @@ func (h *Agent) Generate(r GenerateRequest) (*GenerateResponseWrapper, error) {
 		return nil, err
 	}
 	stats, err := Client.Query(
-		h.Config.Options.GenerateURL,
+		agent.Config.Options.GenerateURL,
 		&response,
 		headers,
 		true,
@@ -135,7 +157,7 @@ func (h *Agent) Generate(r GenerateRequest) (*GenerateResponseWrapper, error) {
 
 }
 
-func (h *Agent) Embed(
+func (agent *Agent) Embed(
 	r EmbedRequest,
 ) (*EmbedReponseWrapper, error) {
 	headers := makeHeaders("")
@@ -145,17 +167,18 @@ func (h *Agent) Embed(
 		return nil, err
 	}
 	stats, err := Client.Query(
-		h.Config.Options.EmbeddingURL,
+		agent.Config.Options.EmbeddingURL,
 		&response,
 		headers,
 		true,
-		15000,
+		30000,
 		body,
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error: %v", err)
 	}
+
 	if stats.StatusCode != 200 {
 		return nil, fmt.Errorf("status code %d", stats.StatusCode)
 	}
@@ -166,12 +189,24 @@ func (h *Agent) Embed(
 
 }
 
-func (h *Agent) ListRoutes() []*common.Route {
+func (agent *Agent) ListRoutes() []*common.Route {
 	routes := []*common.Route{
 		{
 			Endpoint: "/ai/embed",
 			Methods:  []string{"POST"},
-			Handler:  h.EmbedRequest,
+			Handler:  agent.EmbedRequest,
+			Auth:     "public",
+		},
+		{
+			Endpoint: "/ai/config",
+			Methods:  []string{"GET"},
+			Handler:  agent.ConfigRequest,
+			Auth:     "public",
+		},
+		{
+			Endpoint: "/ai/health",
+			Methods:  []string{"GET"},
+			Handler:  agent.HealthRequest,
 			Auth:     "public",
 		},
 	}
