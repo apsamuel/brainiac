@@ -9,23 +9,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type PostgresConfig struct {
-	Host        string `json:"host" yaml:"host"`
-	Port        int    `json:"port" yaml:"port"`
-	Username    string `json:"username" yaml:"username"`
-	Password    string `json:"password" yaml:"password"`
-	DatasetName string `json:"dataset_name" yaml:"dataset_name"`
-}
-
-type SqliteConfig struct {
-}
-
-type RedisConfig struct {
-	Host     string `json:"host" yaml:"host"`
-	Port     int    `json:"port" yaml:"port"`
-	Password string `json:"password" yaml:"password"`
-}
-
 type ApiConfig struct {
 	Origins     []string `json:"origins" yaml:"origins"`
 	Host        string   `json:"host" yaml:"host"`
@@ -58,10 +41,26 @@ type AiConfig struct {
 	DefaultGenerateModel  string                  `yaml:"generate_model" json:"generate_model"`
 	ModelPersonas         map[string]ModelPersona `yaml:"personas" json:"personas"`
 }
+type RedisConfig struct {
+	Host     string `json:"host" yaml:"host"`
+	Port     int    `json:"port" yaml:"port"`
+	Password string `json:"password" yaml:"password"`
+}
 
 type CacheConfig struct {
 	Engine string      `json:"engine" yaml:"engine"`
 	Redis  RedisConfig `json:"redis" yaml:"redis"`
+}
+
+type PostgresConfig struct {
+	Host        string `json:"host" yaml:"host"`
+	Port        int    `json:"port" yaml:"port"`
+	Username    string `json:"username" yaml:"username"`
+	Password    string `json:"password" yaml:"password"`
+	DatasetName string `json:"dataset_name" yaml:"dataset_name"`
+}
+
+type SqliteConfig struct {
 }
 
 type DatabaseConfig struct {
@@ -179,13 +178,13 @@ func (c *Config) String() string {
 }
 
 /*
-ParseConfig parses a YAML configuration and returns the provided type
+FromFileToStruct parses a YAML configuration and returns the provided type
 
 - filename: the path to the YAML configuration file
 
 - c: the type to return
 */
-func ParseConfig(filename string, c any) (any, error) {
+func FromFileToStruct(filename string, c any) (any, error) {
 	if c == nil {
 		c = make(map[string]interface{})
 	}
@@ -195,6 +194,21 @@ func ParseConfig(filename string, c any) (any, error) {
 		return nil, err
 	}
 	err = yaml.Unmarshal(data, &c)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+func FromInterfaceToStruct(data map[string]interface{}, c any) (any, error) {
+	if c == nil {
+		c = make(map[string]interface{})
+	}
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	err = yaml.Unmarshal(dataBytes, &c)
 	if err != nil {
 		return nil, err
 	}

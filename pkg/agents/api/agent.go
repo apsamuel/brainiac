@@ -57,6 +57,7 @@ func (agent *Agent) MakeRouter() error {
 	// corsOptions := handlers.AllowedOrigins(h.Config.Options.Origins)
 	// headersOptions = handlers.AllowedHeaders([]string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"})
 	// handler := handlers.CORS(corsOptions, headersOptions)(h.Router)
+	agent.Config.Log.Info().Msgf("loading templates from %s", agent.Config.Options.TemplateDir)
 	agent.Templater = template.Must(template.New("index").Funcs(functionMap).ParseGlob(fmt.Sprintf("%s/*.html", agent.Config.Options.TemplateDir)))
 	return nil
 }

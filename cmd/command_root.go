@@ -25,6 +25,8 @@ func init() {
 	rootCommand.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "enable debugging")
 
 	rootCommand.AddCommand(runCommand)
-	rootCommand.AddCommand(runxCommand)
+	// rootCommand.AddCommand(runxCommand)
 	rootCommand.AddCommand(configCommand)
+	rootCommand.AddCommand(aiCommand)
+	rootCommand.AddCommand(apiCommand)
 }
