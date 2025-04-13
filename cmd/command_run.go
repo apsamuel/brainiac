@@ -5,11 +5,11 @@ import (
 	"os"
 	"strconv"
 
-	control "github.com/apsamuel/brainiac/pkg/agents/admin"
-	"github.com/apsamuel/brainiac/pkg/agents/ai"
 	"github.com/apsamuel/brainiac/pkg/agents/api"
 	"github.com/apsamuel/brainiac/pkg/cache"
 	"github.com/apsamuel/brainiac/pkg/common"
+	control "github.com/apsamuel/brainiac/pkg/core/admin"
+	"github.com/apsamuel/brainiac/pkg/core/ai"
 	"github.com/apsamuel/brainiac/pkg/database"
 	"github.com/apsamuel/brainiac/pkg/logger"
 	"github.com/spf13/cobra"
