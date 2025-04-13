@@ -82,6 +82,20 @@ type ChatResponse struct {
 	Model string `json:"model"`
 }
 
+func NewAgent(jsonConfig map[string]interface{}) (*Agent, error) {
+	config := &Config{}
+	err := config.ConfigureFromInterface(jsonConfig)
+	// get the obsrvers
+	// initialize storage
+	// initialize cache
+	// initialize channel
+	if err != nil {
+		return nil, err
+	}
+	return &Agent{
+		Config: config,
+	}, nil
+}
 func makeHeaders(apiToken string) map[string]string {
 	if apiToken == "" {
 		return map[string]string{

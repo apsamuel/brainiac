@@ -8,9 +8,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const SelfName = "control"
+
 type Options struct {
 	Listen string `yaml:"listen" json:"listen"`
 	Enable bool   `yaml:"enabled" json:"enabled"`
+	Host   string `yaml:"host" json:"host"`
+	Port   int    `yaml:"port" json:"port"`
 }
 type Config struct {
 	Options Options         `yaml:"control" json:"control"`

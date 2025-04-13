@@ -32,6 +32,8 @@ type ModelPersona struct {
 }
 
 type AiConfig struct {
+	Host                  string                  `yaml:"host" json:"host"`
+	Port                  int                     `yaml:"port" json:"port"`
 	Engine                string                  `yaml:"engine" json:"engine"`
 	EmbeddingApiToken     string                  `yaml:"embedding_api_token" json:"embedding_api_token"`
 	EmbeddingURL          string                  `yaml:"embedding_url" json:"embedding_url"`

@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	control "github.com/apsamuel/brainiac/pkg/agents/admin"
 	"github.com/apsamuel/brainiac/pkg/agents/ai"
 	"github.com/apsamuel/brainiac/pkg/agents/api"
 	"github.com/apsamuel/brainiac/pkg/cache"
@@ -24,8 +25,10 @@ var runCommand = &cobra.Command{
 		var apiConfig api.Config
 		var brainiacConfig common.Config
 		var aiConfig ai.Config
+		var controlConfig control.Config
 
 		l := logger.Logger
+
 		l.Logger.Info().Msg("starting brainiac")
 
 		if debug {
@@ -207,6 +210,23 @@ var runCommand = &cobra.Command{
 
 		cacheConfig.Log = &l.Logger
 		cacheStorage, err := cache.MakeStorage(cacheConfig)
+		if err != nil {
+			l.Logger.Error().Msg(err.Error())
+		}
+
+		/*
+			configure control node
+		*/
+		_, err = controlConfig.FromInterface(jsonConfig)
+		if err != nil {
+			l.Logger.Error().Msg(err.Error())
+		}
+		controlConfig.Log = &l.Logger
+		controlNode := control.ControlNode{
+			Config: &controlConfig,
+			Log:    &l.Logger,
+		}
+		err = controlNode.Init()
 		if err != nil {
 			l.Logger.Error().Msg(err.Error())
 		}

@@ -14,15 +14,15 @@ type ControlNode struct {
 	Router *mux.Router
 }
 
-func (node *ControlNode) Init() {
+func (node *ControlNode) Init() error {
 	// Initialize the control node
 	node.Log = node.Config.Log
 	node.Log.Info().Msg("control node initialized")
 	node.Router = mux.NewRouter()
-	node.startHttpServer()
+	return node.startHttpServer()
 }
 
-func (node *ControlNode) startHttpServer() {
+func (node *ControlNode) startHttpServer() error {
 	// Start the server
 	node.Log.Info().Msg("starting control node server")
 	corsOptions := cors.Options{
@@ -39,20 +39,8 @@ func (node *ControlNode) startHttpServer() {
 		corsMiddleware,
 	); err != nil {
 		node.Log.Error().Err(err).Msg("failed to start control node server")
+		return err
 	}
 	node.Log.Info().Msg("control node server started")
-	// Implement server start logic here
+	return nil
 }
-
-// func NewControlNode(config *Config) *ControlNode {
-// 	// the control node controls agents, their configuration, persistence, and
-// 	// the control node is responsible for managing the agents and their configuration
-// 	controller := &ControlNode{
-// 		Config: config,
-// 		Log:    config.Log,
-// 	}
-
-// 	controller.Init()
-
-// 	return controller
-// }
